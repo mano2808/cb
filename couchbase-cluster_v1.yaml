@@ -1,0 +1,53 @@
+apiVersion: couchbase.com/v1
+kind: CouchbaseCluster
+metadata:
+  name: test
+  namespace: default
+spec:
+  baseImage: couchbase/server
+  version: enterprise-6.0.1
+  authSecret: cb-example-auth
+  exposeAdminConsole: true
+  adminConsoleServices:
+    - data
+  disableBucketManagement: false
+  cluster:
+    dataServiceMemoryQuota: 256
+     
+    
+    
+    autoFailoverTimeout: 120
+    autoFailoverMaxCount: 3
+    autoFailoverOnDataDiskIssues: true
+    autoFailoverOnDataDiskIssuesTimePeriod: 120
+    autoFailoverServerGroup: false
+  buckets:
+    - name: default
+      type: couchbase
+      memoryQuota: 256
+      replicas: 1
+      ioPriority: high
+      evictionPolicy: fullEviction
+      conflictResolution: seqno
+      enableFlush: true
+      enableIndexReplica: false
+      compressionMode: passive
+  servers:
+    - size: 3
+      name: all_services
+      services:
+        - data
+           
+      pod:
+        volumeMounts:
+               
+          default: couchbase-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: couchbase-pvc
+      spec:
+        storageClassName: "slow"
+        resources:
+          requests:
+            storage: 512Mi
+
